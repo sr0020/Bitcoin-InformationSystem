@@ -1,0 +1,59 @@
+#!/usr/bin/env python
+# Display a runtext with double-buffering.
+from samplebase import SampleBase
+from rgbmatrix import graphics
+import time
+import random
+import pybithumb as pyBI
+from datetime import datetime, timedelta
+
+
+class RunText(SampleBase):
+    def __init__(self, *args, **kwargs):
+        super(RunText, self).__init__(*args, **kwargs)
+        self.parser.add_argument("-t", "--text", help="The text to scroll on the RGB LED panel", default="Hello world!")
+
+    def run(self):
+        offscreen_canvas = self.matrix.CreateFrameCanvas()
+        now = datetime.now()
+        delta = timedelta(seconds = 15)
+        trigger_time = now + delta
+
+        font = graphics.Font()
+        font.LoadFont("../../../fonts/7x13.bdf")
+        textColor = graphics.Color(255, 255, 0)
+        textColor2 = graphics.Color(255, 0, 0)
+        pos = offscreen_canvas.width
+        pos2 = offscreen_canvas.height
+        my_text = self.args.text
+        bit_Data = self.args.text
+
+        while pyBI > 0 :
+            offscreen_canvas.Clear()
+
+            now = datetime.now()
+            #bit_Data = pyBI.get_ohlcv("BTC")
+            bit_Data = pyBI.get_current_price(self.ticker)
+            time.sleep(1)
+            self.dataSent.emit(bit_Data)
+            if int(current_time) > 11:
+                current_time = now.strftime('%H:%M:%S')
+                my_text=current_time
+                print(current_time)
+            else:
+                print('error')
+                current_time = now.strftime('%H:%M:%S')
+            font = graphics.Font()
+            pos = 0
+            graphics.DrawText(offscreen_canvas, font, pos, 7, textColor, my_text)
+            graphics.DrawText(offscreen_canvas, font, pos, 15, textColor2, bit_Data)
+
+            time.sleep(0.05)
+            offscreen_canvas = self.matrix.SwapOnVSync(offscreen_canvas)
+
+
+# Main function
+if __name__ == "__main__":
+    run_text = RunText()
+    if (not run_text.process()):
+        run_text.print_help()
